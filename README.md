@@ -1,2 +1,2 @@
-# kanban
+# Kanban
 A kanban MERN Stack Application
