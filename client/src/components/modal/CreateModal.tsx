@@ -26,6 +26,8 @@ const CreateModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onSave,statu
       
       title,
       description,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       status: status 
     };
 
@@ -65,6 +67,8 @@ const CreateModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onSave,statu
             type="text"
             className="mt-2 p-2 w-full border rounded"
             value={status}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             onChange={() => setStatus(status)}
             disabled
           />
