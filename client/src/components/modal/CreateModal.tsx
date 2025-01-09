@@ -32,6 +32,9 @@ const CreateModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onSave,statu
     };
 
     onSave(newTask); // Send the new task to the parent component
+    setTitle('')
+    setDescription('')
+
     onClose(); // Close the modal
   };
 
@@ -81,7 +84,7 @@ const CreateModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onSave,statu
             Cancel
           </button>
           <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded">
-            Save Task
+            Create Task
           </button>
         </div>
       </div>

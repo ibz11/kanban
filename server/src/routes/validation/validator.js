@@ -11,7 +11,7 @@ export const validateTitle = [
    body('description')
   .isString()
   .notEmpty().withMessage('Description is required')
-  .isLength({ min: 5, max: 200 }).withMessage('Description should be between 10 and 200 characters'),
+  .isLength({ min: 1, max: 200 }).withMessage('Description should be between 10 and 200 characters'),
  ]
 
  export const validateStatus=[body('status')

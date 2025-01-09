@@ -42,7 +42,7 @@ export function Column({ column, tasks, onTaskCreate ,
   };
 
   const handleCreateTask = (newTask: Task) => {
-    onTaskCreate(newTask); // Pass the new task to the parent (DragDrop)
+    onTaskCreate(newTask); 
   };
 
 
