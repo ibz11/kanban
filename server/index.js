@@ -4,7 +4,7 @@ import 'dotenv/config'
 import mongoose from 'mongoose';
 import compression from 'compression'; 
 
-import taskRouter from './routes/task.route.js'
+import taskRouter from './src/routes/task.route.js'
 
 
 const app = express();
