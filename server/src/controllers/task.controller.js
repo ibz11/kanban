@@ -1,11 +1,12 @@
 import Task from '../models/Task.js'
+import { validationResult } from 'express-validator'
 
 
 
 
 export const getAllTasks=async(require,res,next)=>{
   try {
-    const tasks=await Task.find({})
+    const tasks=await Task.find({}).sort({ createdAt: -1 });
     res.status(200).json({tasks:tasks})
   }
   catch(err) {
@@ -14,11 +15,13 @@ export const getAllTasks=async(require,res,next)=>{
 }
 export const createTask = async (req, res, next) => {
     try {
-    if (!req.body){
-        return res.status(404).json({message:"Empty body"})
+    const errors=validationResult(req)
+    if (!errors.isEmpty()){
+      const errMsg = errors.array().map(err => err.msg);
+        return res.status(400).json({errors:errMsg})
     }
       const task = await Task.create(req.body);
-      return res.status(201).json(task);
+      return res.status(200).json(task);
     } catch (error) {
       next(error);
       console.log(error)

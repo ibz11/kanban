@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 
 import { useState , useEffect} from 'react';
 import type { Task, Column as ColumnType } from '../types';
 import { Column } from './Column';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import CreateForm from './Forms/CreateForm';
 
 
 
@@ -29,10 +32,13 @@ const DragDrop = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+
   
     useEffect(() => {
       const fetchTasks = async () => {
-        const url = "http://localhost:4000/api/v1/task/"; // Replace with your API endpoint
+        const url = "http://localhost:4000/api/v1/task/"; 
+        // const url = "http://localhost:4000/api/v1/task/";
   
         try {
           const response = await fetch(url, {
@@ -61,7 +67,8 @@ const DragDrop = () => {
     
 
     async function updateTaskStatus(taskId: string, newStatus: string) {
-      const url = `http://localhost:4000/api/v1/task/${taskId}`; // Replace with your actual API endpoint
+      const url = `http://localhost:4000/api/v1/task/${taskId}`; 
+      // const url = `http://localhost:4000/api/v1/task/${taskId}`; 
       const payload = { status: newStatus }; // Data to send
     
       try {
@@ -78,7 +85,7 @@ const DragDrop = () => {
           throw new Error(errorData.message || 'Failed to update task status');
         }
     
-        console.log('Task status updated successfully');
+        // console.log('Task status updated successfully');
       } catch (error) {
         console.error('Error updating task status:', error);
         alert('Failed to update task status. Please try again.');
@@ -130,25 +137,37 @@ if (error) return <p>Error: {error}</p>;
     
     
     return (
+      <>
+
+  
         <div className="p-4">
 
 <div className="flex justify-center">
+<div className=""> 
+  <CreateForm/>
 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
           <DndContext onDragEnd={handleDragEnd}>
             {COLUMNS.map((column) => (
              
                 <Column
                   key={column.id}
                   column={column}
+                
                   tasks={tasks.filter((task) => task.status === column.id)}
                 />
               
             ))}
           </DndContext>
+
+         
         </div>
 </div>
 
       </div> 
+      </div>
+      </>
+
     );
 }
 

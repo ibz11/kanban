@@ -1,42 +1,25 @@
 import { useDraggable } from '@dnd-kit/core';
 import { Task } from '../types';
 import { CiEdit, CiTrash } from 'react-icons/ci';
+import axios from 'axios';
+
 
 
 type TaskCardProps = {
   task: Task;
+
+
+
 };
 
-export function TaskCard({ task }: TaskCardProps) {
 
-// async function deleteTask({taskId}:Task){
 
-//     const url = `http://localhost:4000/api/v1/task/${taskId}`; // Replace with your actual API endpoint
-   
-//   console.log(taskId)
-//     try {
-//       const response = await fetch(url, {
-//         method: 'DELETE', // Or 'PUT', depending on your API
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-        
-//       });
+
+export const TaskCard:React.FC<TaskCardProps>=({ task })=> {
+
+
+
   
-//       if (!response.ok) {
-//         const errorData = await response.json();
-//         throw new Error(errorData.message || 'Failed to delete task ');
-//       }
-  
-//       console.log('Task status updated successfully');
-//     } catch (error) {
-//       console.error('Error updating task status:', error);
-//       alert('Failed to delete task status. Please try again.');
-
-//     }
-//   }
-
-
 
 
 
@@ -51,7 +34,26 @@ export function TaskCard({ task }: TaskCardProps) {
       }
     : undefined;
 
+
+    const handleDeleteClick = async (id:string,e: React.MouseEvent) => {
+      e.stopPropagation();
+        try {
+          const response = await axios.delete(`http://localhost:4000/api/v1/task/${id}`);
+          if (response.status === 200) {
+            console.log("Task deleted successfully");
+          }
+        } catch (error) {
+          console.error("Error deleting task:", error);
+        }
+      
+    };
+
+
+
+
+
   return (
+    <>
     <div
       ref={setNodeRef}
       {...listeners}
@@ -60,12 +62,12 @@ export function TaskCard({ task }: TaskCardProps) {
       style={style}
     > 
     {/* Edit and Delete */}
-    <div  className="my-2.5 flex justify-end gap-2">
+    <div  className="my-2.5 flex justify-center gap-2">
      <div className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
     <CiEdit  className="ml-[1.4px] my-[0.8px] text-green-500"/>
     </div>
 
-    <button  className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
+    <button   onClick={(e) => handleDeleteClick(task._id,e)} className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
     <CiTrash  className="ml-[1.4px] my-[0.8px] text-red-500" />
     </button>
 
@@ -84,5 +86,8 @@ export function TaskCard({ task }: TaskCardProps) {
 
       <p className="mt-2 text-sm text-neutral-400">{task.description}</p>
     </div>
+
+
+    </>
   );
 }
