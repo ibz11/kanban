@@ -13,7 +13,12 @@ const dbUrl = process.env.MONGO_URL
 
 
 app.use(express.json())
-app.use(cors())
+// app.use(cors())
+app.use(cors({
+    origin: 'https://kanban-client-phi.vercel.app', // Replace with your frontend domain
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],    // Specify allowed HTTP methods
+    credentials: true,                             // Allow cookies if needed
+  }));
 app.use(compression())
 
 
