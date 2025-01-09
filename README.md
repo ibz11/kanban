@@ -51,10 +51,12 @@ Key features of the app include drag-and-drop functionality for seamless task mo
    git clone https://github.com/ibz11/kanban/
    cd server
 2.Run npm install:
-   This is to install all  the packages
-   
-3. Run npm run dev:
-    This is to run the application
+    ```bash
+       npm run dev  
+    
+3.Run npm run dev:
+    ```bash
+       npm run dev
 
 
 
