@@ -1,26 +1,36 @@
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable} from '@dnd-kit/core';
 import { Task } from '../types';
 import { CiEdit, CiTrash } from 'react-icons/ci';
-import axios from 'axios';
 
+import EditModal from './modal/EditModal';
+import DeleteModal from './modal/DeleteModal';
 
 
 type TaskCardProps = {
   task: Task;
 
+  handleSave:(updatedTask:Task)=>void
+  handleEditClick:()=>void
+  setIsEditModalOpen:(isEditModalOpen:boolean)=>void
+  isEditModalOpen:boolean
 
+
+  handleDeleteClick:(id:string)=>void
+  setIsDeleteModalOpen:(isDeleteModalOpen:boolean)=>void
+  isDeleteModalOpen:boolean
 
 };
 
 
 
 
-export const TaskCard:React.FC<TaskCardProps>=({ task })=> {
+export const TaskCard:React.FC<TaskCardProps>=({ task ,
+  handleEditClick,setIsEditModalOpen,  isEditModalOpen,handleSave,
+  handleDeleteClick,setIsDeleteModalOpen,  isDeleteModalOpen})=> {
 
 
 
   
-
 
 
 
@@ -35,18 +45,7 @@ export const TaskCard:React.FC<TaskCardProps>=({ task })=> {
     : undefined;
 
 
-    const handleDeleteClick = async (id:string,e: React.MouseEvent) => {
-      e.stopPropagation();
-        try {
-          const response = await axios.delete(`http://localhost:4000/api/v1/task/${id}`);
-          if (response.status === 200) {
-            console.log("Task deleted successfully");
-          }
-        } catch (error) {
-          console.error("Error deleting task:", error);
-        }
-      
-    };
+
 
 
 
@@ -63,11 +62,11 @@ export const TaskCard:React.FC<TaskCardProps>=({ task })=> {
     > 
     {/* Edit and Delete */}
     <div  className="my-2.5 flex justify-center gap-2">
-     <div className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
+     <button  onClick={handleEditClick} className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
     <CiEdit  className="ml-[1.4px] my-[0.8px] text-green-500"/>
-    </div>
+    </button>
 
-    <button   onClick={(e) => handleDeleteClick(task._id,e)} className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
+    <button   onClick={() => setIsDeleteModalOpen(true)} className="bg-black rounded-full p-0.5 h-6 w-6 text-center shadow-xl mt-0.5 font-bold hover:bg-gray-300 border border-slate-900">
     <CiTrash  className="ml-[1.4px] my-[0.8px] text-red-500" />
     </button>
 
@@ -86,6 +85,24 @@ export const TaskCard:React.FC<TaskCardProps>=({ task })=> {
 
       <p className="mt-2 text-sm text-neutral-400">{task.description}</p>
     </div>
+{/* Edit task modal */}
+    <EditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)} 
+        onSave={handleSave} 
+        task={task}
+      />
+
+
+          {/* Delete Confirmation Modal */}
+        <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)} // Close modal
+        id={task._id}
+        onConfirm={handleDeleteClick} // Confirm delete action
+        title="Delete Task"
+        message="Are you sure you want to delete this task?"
+      />
 
 
     </>

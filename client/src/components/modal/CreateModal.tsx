@@ -1,99 +1,85 @@
-import React, { useState } from "react";
-import axios from "axios";
+// CreateModal.tsx
+import React, { useState } from 'react';
+import { Task } from '../../types';
 
-interface CreateModalProps {
+type CreateModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreated: (task: Task) => void;
-  status: "To-do" | "In-progress" | "Done"; // Ensure status is one of these values
-}
+  onSave: (newTask: Task) => void;
+  status: string;
+};
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: "To-do" | "In-progress" | "Done";
-}
-
-const CreateModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCreated, status }) => {
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const payload: Omit<Task, "id"> = {
-      title,
-      description,
-      status,
-    };
-
-    try {
-      const response = await axios.post<Task>("https://your-api-endpoint.com/tasks", payload);
-      onCreated(response.data); // Pass the newly created task to the parent
-      onClose(); // Close the modal
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const CreateModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onSave,status }) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+//    const [status, setStatus] = useState<"To-do" | "In-progress" | "Done">("To-do");
 
   if (!isOpen) return null;
 
+  const handleSave = () => {
+    if (title.trim() === '' || description.trim() === '') {
+      alert('Please fill in both fields');
+      return;
+    }
+
+    const newTask: Task = {
+      
+      title,
+      description,
+      status: status 
+    };
+
+    onSave(newTask); // Send the new task to the parent component
+    onClose(); // Close the modal
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Create Task</h2>
-        {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              required
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className={`px-4 py-2 text-white rounded-md ${
-                loading ? "bg-indigo-300" : "bg-indigo-600 hover:bg-indigo-700"
-              }`}
-            >
-              {loading ? "Creating..." : "Create"}
-            </button>
-          </div>
-        </form>
+    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white p-6 rounded-lg w-80">
+        <h2 className="font-semibold text-lg">Create New Task</h2>
+        <div className="mt-4">
+          <label className="block text-sm">Task Title</label>
+          <input
+            type="text"
+            className="mt-2 p-2 w-full border rounded"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="mt-4">
+          <label className="block text-sm">Task Description</label>
+          <textarea
+            className="mt-2 p-2 w-full border rounded"
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          ></textarea>
+        </div>
+
+        <div className="mb-4">
+        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+          Status
+        </label>
+
+        <input
+            type="text"
+            className="mt-2 p-2 w-full border rounded"
+            value={status}
+            onChange={() => setStatus(status)}
+            disabled
+          />
+      </div>
+
+
+
+        <div className="mt-4 flex justify-end gap-4">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded">
+            Cancel
+          </button>
+          <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded">
+            Save Task
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
+
 
 import { useState , useEffect} from 'react';
 import type { Task, Column as ColumnType } from '../types';
 import { Column } from './Column';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
-import CreateForm from './Forms/CreateForm';
+import { DndContext, DragEndEvent, KeyboardSensor, MouseSensor, TouchSensor, useSensors } from '@dnd-kit/core';
+
+// import UpdateForm from './Forms/UpdateForm';
+import { PointerSensor,  useSensor } from '@dnd-kit/core';
+import axios from 'axios';
 
 
 
@@ -37,11 +39,10 @@ const DragDrop = () => {
   
     useEffect(() => {
       const fetchTasks = async () => {
-        const url = "http://localhost:4000/api/v1/task/"; 
-        // const url = "http://localhost:4000/api/v1/task/";
+
   
         try {
-          const response = await fetch(url, {
+          const response = await fetch(`${process.env.REACT_API_URL}`, {
             method: "GET",
             
           });
@@ -52,9 +53,11 @@ const DragDrop = () => {
           }
   
           const data = await response.json();
-          console.log(data.tasks)
+          // console.log(data.tasks)
           setTasks(data.tasks); // Assuming the API returns an array of tasks
         } catch (error) {
+         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+         // @ts-expect-error 
           setError(error);
         } finally {
           setLoading(false);
@@ -67,12 +70,11 @@ const DragDrop = () => {
     
 
     async function updateTaskStatus(taskId: string, newStatus: string) {
-      const url = `http://localhost:4000/api/v1/task/${taskId}`; 
-      // const url = `http://localhost:4000/api/v1/task/${taskId}`; 
+ 
       const payload = { status: newStatus }; // Data to send
     
       try {
-        const response = await fetch(url, {
+        const response = await fetch(`${process.env.REACT_API_URL}/${taskId}`, {
           method: 'PATCH', // Or 'PUT', depending on your API
           headers: {
             'Content-Type': 'application/json',
@@ -85,22 +87,111 @@ const DragDrop = () => {
           throw new Error(errorData.message || 'Failed to update task status');
         }
     
-        // console.log('Task status updated successfully');
+   
       } catch (error) {
         console.error('Error updating task status:', error);
         alert('Failed to update task status. Please try again.');
     
-        // Optionally revert the task's status in case of an error
+    
+        // setTasks((prevTasks) =>
+        //   prevTasks.map((task) =>
+        //     task._id === taskId
+        //       ? { ...task, status: oldStatus } 
+        //       : task
+        //   )
+        // );
+
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
             task._id === taskId
-              ? { ...task, status: oldStatus } // Revert to the previous status
+              ? { ...task, status: task.status } // Going back to task previous status
               : task
           )
         );
+
+
+
       }
     }
+
+    //Create Task
+    const handleCreateTask = async (newTask: Task) => {
+      try {
+        // Make the POST API request to save the task using Axios
+        const response = await axios.post(`${process.env.REACT_API_URL}`, newTask);
     
+        // Axios doesn't require a separate `.json()` method to parse the response
+        const savedTask = response.data;
+    
+        // Update the state with the newly saved task
+        setTasks((prevTasks) => [...prevTasks, savedTask]);
+      } catch (error) {
+        console.error('Error creating task:', error);
+        alert('Failed to create task. Please try again.');
+      }
+    };
+
+
+  //Edit Task
+  //Edit Modal
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+    //Edit modal 
+    const handleEditClick = () => {
+      setIsEditModalOpen(true); // Open the edit modal
+    };
+  
+    const handleSave = async (updatedTask: Task) => {
+      try {
+        const response = await axios.put(`${process.env.REACT_API_URL}/${updatedTask._id}`, updatedTask);
+        if (response.status === 200) {
+          console.log('Task updated successfully');
+        }
+        setTasks(tasks.map(task=> (task._id === updatedTask._id ? response.data : task)));
+      } catch (error) {
+        console.error('Error updating task:', error);
+      } finally {
+        setIsEditModalOpen(false); // Close modal after updating
+      }
+    };
+
+    // Delete Task
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // To control modal visibility
+
+    const handleDeleteClick = async (id:string) => {
+      try {
+        const response = await axios.delete(`${process.env.REACT_API_URL}/${id}`);
+        if (response.status === 200) {
+          console.log('Task deleted successfully');
+        }
+        setTasks(tasks.filter(task => task._id !== id));
+      } catch (error) {
+        console.error('Error deleting task:', error);
+      } finally {
+        setIsDeleteModalOpen(false); // Close modal after deletion
+      }
+    };
+    
+
+    
+    //This is fixing the issue with onClick even is not working
+    const pointerSensor = useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 0.01
+      }
+    })
+    const mouseSensor = useSensor(MouseSensor)
+    const touchSensor = useSensor(TouchSensor)
+    const keyboardSensor = useSensor(KeyboardSensor)
+  
+    const sensors = useSensors(
+      mouseSensor,
+      touchSensor,
+      keyboardSensor,
+      pointerSensor
+    )
+
+    // End if Sensors
     
     function handleDragEnd(event: DragEndEvent) {
       const { active, over } = event;
@@ -127,7 +218,7 @@ const DragDrop = () => {
       updateTaskStatus(taskId, newStatus);
     }
     
-    
+  
     
     
     
@@ -143,17 +234,28 @@ if (error) return <p>Error: {error}</p>;
         <div className="p-4">
 
 <div className="flex justify-center">
-<div className=""> 
-  <CreateForm/>
+<div className="">
+
+
 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-          <DndContext onDragEnd={handleDragEnd}>
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             {COLUMNS.map((column) => (
              
                 <Column
                   key={column.id}
                   column={column}
-                
+                  onTaskCreate={handleCreateTask}
+
+                  handleEditClick={handleEditClick}
+                  setIsEditModalOpen={setIsEditModalOpen}
+                  isEditModalOpen={isEditModalOpen}
+                  handleSave={handleSave}
+
+                  isDeleteModalOpen={isDeleteModalOpen}
+                  handleDeleteClick={handleDeleteClick}
+                  setIsDeleteModalOpen={setIsDeleteModalOpen}
+              
                   tasks={tasks.filter((task) => task.status === column.id)}
                 />
               
